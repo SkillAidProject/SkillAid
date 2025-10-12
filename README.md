@@ -159,7 +159,12 @@ SkillAid/
 * Skill program listing and detail views
 
 * Mentor dashboard and chat module
-
+  # TEAM MEMBERS AND THEIR ROLES
+  Emmanuel Adu Yeboah - Team Leader
+  Okoro Ikechukwu Stephen - Programmer
+  MD Qasim                - Programmer
+  Eugene Priest           - Designer
+  Prashant Puri           - Project Manager
 
  
 ## Feedback & Contributions
@@ -173,5 +178,6 @@ We welcome feedback from learners, educators, and developers. If you have ideas 
 SkillAid is built for the millions who are often left behind in digital education. By combining technology, empathy, and accessibility, we aim to create a platform that’s not just functional—but transformational.
 
 “Education should be a right, not a privilege. SkillAid makes that right accessible to all.”
+
 
 
