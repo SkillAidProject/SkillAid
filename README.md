@@ -119,6 +119,7 @@ SkillAid is designed with empathy and inclusion at its core:
  
 ## Repository Structure
 
+```
 SkillAid/
 ├── lib/
 │   ├── screens/
@@ -130,7 +131,7 @@ SkillAid/
 │   └── icons/
 ├── pubspec.yaml
 └── README.md
-
+```
 
  
 ## Setup Instructions
@@ -172,4 +173,5 @@ We welcome feedback from learners, educators, and developers. If you have ideas 
 SkillAid is built for the millions who are often left behind in digital education. By combining technology, empathy, and accessibility, we aim to create a platform that’s not just functional—but transformational.
 
 “Education should be a right, not a privilege. SkillAid makes that right accessible to all.”
+
 
