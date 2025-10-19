@@ -249,19 +249,18 @@ In **Week 2**, the focus was on **translating wireframes into a working UI proto
 
 
 ## **Next Steps (Week 3 Preview)**
-
-* Integrate Firebase authentication and realtime data storage.
+*Continue with the rest of the pages
 * Begin backend connection for user login and mentorship data.
 * Expand UI to include mentorship chat and profile settings.
 * Conduct accessibility testing for voice and text scaling features.
 
-0
 
 ##  **Closing Statement**
 
 Week 2 marked the transition from concept to interaction — transforming static wireframes into a working user interface. The SkillAid prototype now provides a functional and visually cohesive user experience that reflects our vision of accessible learning for all.
 
-> “Accessibility is not an option — it’s the foundation of true education for everyone.”
+> “Accessibility is not an option ,it’s the foundation of true education for everyone.”
+
 
 
 
