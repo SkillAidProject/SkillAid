@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "380852729926",
+    "project_id": "skillaid-237d1",
+    "storage_bucket": "skillaid-237d1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:380852729926:android:8b86108f4b83936dbab247",
+        "android_client_info": {
+          "package_name": "com.example.skillaid"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEQG6vPxH5ZsahRjT2s8SVxU9chdhybBM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:skillaid/services/auth_service.dart';
 import '../widgets/login_textfield.dart';
 
 class MentorAuthScreen extends StatefulWidget {
@@ -10,6 +11,8 @@ class MentorAuthScreen extends StatefulWidget {
 
 class _MentorAuthScreenState extends State<MentorAuthScreen> {
   bool isLogin = true;
+  bool isLoading = false;
+  String message = '';
 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -18,6 +21,43 @@ class _MentorAuthScreenState extends State<MentorAuthScreen> {
   final _expertise1Controller = TextEditingController();
   final _expertise2Controller = TextEditingController();
   final _expertise3Controller = TextEditingController();
+
+  final AuthService _authService = AuthService();
+
+  Future<void> _submit() async {
+    setState(() {
+      isLoading = true;
+      message = '';
+    });
+
+    try {
+      if (isLogin) {
+        await _authService.signIn(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+        setState(() => message = '✅ Mentor logged in successfully!');
+      } else {
+        await _authService.signUpMentor(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+          firstName: _firstNameController.text.trim(),
+          lastName: _lastNameController.text.trim(),
+          expertise: [
+            _expertise1Controller.text.trim(),
+            _expertise2Controller.text.trim(),
+            _expertise3Controller.text.trim(),
+          ],
+        );
+
+        setState(() => message = '✅ Mentor account created successfully!');
+      }
+    } catch (e) {
+      setState(() => message = e.toString());
+    }
+
+    setState(() => isLoading = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,19 +91,17 @@ class _MentorAuthScreenState extends State<MentorAuthScreen> {
               ),
               child: const Text(
                 '🏅 Mentor',
-                style:
-                TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
               ),
             ),
 
             const SizedBox(height: 20),
             Text(
               isLogin ? 'Welcome Back' : 'Create Account',
-              style:
-              const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             Text(
-              isLogin ? 'Log in to continue learning' : 'Join SkillAid today',
+              isLogin ? 'Log in to continue mentoring' : 'Join SkillAid as a mentor',
               style: TextStyle(color: Colors.grey[600]),
             ),
             const SizedBox(height: 30),
@@ -159,7 +197,6 @@ class _MentorAuthScreenState extends State<MentorAuthScreen> {
               ),
               const SizedBox(height: 10),
 
-              // ✅ Always-visible subtle grey hints
               _expertiseTextField(_expertise1Controller, 'e.g., Web Development'),
               const SizedBox(height: 10),
               _expertiseTextField(_expertise2Controller, 'e.g., Data Science'),
@@ -168,8 +205,7 @@ class _MentorAuthScreenState extends State<MentorAuthScreen> {
               const SizedBox(height: 15),
 
               Container(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: Colors.amber[50],
                   borderRadius: BorderRadius.circular(8),
@@ -194,58 +230,51 @@ class _MentorAuthScreenState extends State<MentorAuthScreen> {
             ],
 
             // 🚀 Login / Sign Up Button
-            ElevatedButton(
+            isLoading
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF006BFF),
                 minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(isLogin
-                        ? "Mentor Login Successful!"
-                        : "Mentor Account Created!"),
-                  ),
-                );
-              },
+              onPressed: _submit,
               child: Text(
                 isLogin ? 'Login' : 'Sign Up',
                 style: const TextStyle(
-                  color: Colors.white, // visible white text
+                  color: Colors.white,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 15),
+            Text(
+              message,
+              style: const TextStyle(color: Colors.red),
+            ),
           ],
         ),
       ),
     );
   }
 
-  /// ✅ Custom local text field for expertise (always show hint, soft grey)
   Widget _expertiseTextField(TextEditingController controller, String hint) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(
-          color: Colors.grey[500], // 👈 subtle grey hint text
-          fontSize: 15,
-        ),
+        hintStyle: TextStyle(color: Colors.grey[500], fontSize: 15),
         filled: true,
         fillColor: Colors.white,
-        contentPadding:
-        const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         enabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Colors.grey, width: 0.8),
           borderRadius: BorderRadius.circular(10),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide:
-          const BorderSide(color: Color(0xFF006BFF), width: 1.2),
+          borderSide: const BorderSide(color: Color(0xFF006BFF), width: 1.2),
           borderRadius: BorderRadius.circular(10),
         ),
       ),
