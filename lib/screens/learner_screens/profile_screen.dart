@@ -4,6 +4,7 @@ import 'package:skillaid/screens/learner_screens/certificate_screen.dart';
 import 'package:skillaid/screens/learner_screens/bookings_screen.dart';
 import 'package:skillaid/screens/learner_screens/questions_screen.dart';
 import 'package:skillaid/screens/learner_screens/filemanager_screen.dart';
+import 'package:skillaid/screens/learner_screens/test.dart';
 import 'notifications_screen.dart';
 
 final logger = Logger();
@@ -797,21 +798,21 @@ class _LearnerProfileScreenState extends State<LearnerProfileScreen> {
                         child: Column(
                           children: [
                             _buildActionTile(
-                              title: 'Account Settings',
-                              icon: Icons.vpn_key_outlined,
+                              title: 'Change Password',
+                              icon: Icons.password_outlined,
                               color: deepIndigo,
                               onTap: () {
                                  logger.i('Navigating to Account Settings.');
-                                 Navigator.push(context, MaterialPageRoute(builder: (ctx) => const _PlaceholderScreen(title: 'Account Settings')));
+                                 Navigator.push(context, MaterialPageRoute(builder: (ctx) => const ChangePasswordScreen()));
                               },
                             ),
                             _buildActionTile(
-                              title: 'Privacy Controls',
-                              icon: Icons.lock_outline,
+                              title: '2-FA Authentication',
+                              icon: Icons.key_outlined,
                               color: deepIndigo,
                               onTap: () {
                                  logger.i('Navigating to Privacy Controls.');
-                                 Navigator.push(context, MaterialPageRoute(builder: (ctx) => const _PlaceholderScreen(title: 'Privacy Controls')));
+                                 Navigator.push(context, MaterialPageRoute(builder: (ctx) => const _PlaceholderScreen(title: '2-FA Authentication')));
                               },
                             ),
                             _buildActionTile(
@@ -823,15 +824,17 @@ class _LearnerProfileScreenState extends State<LearnerProfileScreen> {
                                  Navigator.push(context, MaterialPageRoute(builder: (ctx) => const _PlaceholderScreen(title: 'Notification Preferences')));
                               },
                             ),
-                            _buildActionTile(
-                              title: 'Logout',
-                              icon: Icons.logout,
-                              color: redAccent,
-                              onTap: _handleLogout, // Actual logout function
-                              trailingText: '', // No trailing text for Logout
-                            ),
                           ],
                         ),
+                      ),
+
+                      
+                      _buildActionTile(
+                        title: 'Logout',
+                        icon: Icons.logout,
+                        color: redAccent,
+                        onTap: _handleLogout, // Actual logout function
+                        trailingText: '', // No trailing text for Logout
                       ),
 
                       const SizedBox(height: 40),
