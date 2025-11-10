@@ -4,7 +4,8 @@ import 'package:skillaid/screens/learner_screens/certificate_screen.dart';
 import 'package:skillaid/screens/learner_screens/bookings_screen.dart';
 import 'package:skillaid/screens/learner_screens/questions_screen.dart';
 import 'package:skillaid/screens/learner_screens/filemanager_screen.dart';
-import 'package:skillaid/screens/learner_screens/test.dart';
+import 'package:skillaid/screens/learner_screens/change_password_screen.dart';
+import 'package:skillaid/screens/learner_screens/2fa_auth.dart';
 import 'notifications_screen.dart';
 
 final logger = Logger();
@@ -807,12 +808,12 @@ class _LearnerProfileScreenState extends State<LearnerProfileScreen> {
                               },
                             ),
                             _buildActionTile(
-                              title: '2-FA Authentication',
+                              title: '2FA Authentication',
                               icon: Icons.key_outlined,
                               color: deepIndigo,
                               onTap: () {
-                                 logger.i('Navigating to Privacy Controls.');
-                                 Navigator.push(context, MaterialPageRoute(builder: (ctx) => const _PlaceholderScreen(title: '2-FA Authentication')));
+                                 logger.i('Navigating to "FA Authentication.');
+                                 Navigator.push(context, MaterialPageRoute(builder: (ctx) => const TwoFactorAuthScreen()));
                               },
                             ),
                             _buildActionTile(
