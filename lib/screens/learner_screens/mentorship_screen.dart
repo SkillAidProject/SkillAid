@@ -13,6 +13,53 @@ const Color accentGreen = Color(0xFF4CAF50); // For success/stats (Lessons) - Us
 const Color accentOrange = Color(0xFFFF9800); // For Public Questions Stat and Resources
 const Color redAccent = Color(0xFFE53935); // For clear button
 
+
+
+// -----------------------------------------------------------------------------
+// NEW: Models for messaging and session requests
+// -----------------------------------------------------------------------------
+
+class Message {
+  final String senderId;
+  final String senderName;
+  final String content;
+  final DateTime timestamp;
+  final bool isRead;
+
+  Message({
+    required this.senderId,
+    required this.senderName,
+    required this.content,
+    required this.timestamp,
+    this.isRead = false,
+  });
+}
+
+class SessionRequest {
+  final String id;
+  final String menteeId;
+  final String menteeName;
+  final String mentorId;
+  final String mentorName;
+  final DateTime requestedAt;
+  final String status; // 'pending', 'accepted', 'declined', 'scheduled'
+  final String? notes;
+  final DateTime? scheduledDate;
+
+  SessionRequest({
+    required this.id,
+    required this.menteeId,
+    required this.menteeName,
+    required this.mentorId,
+    required this.mentorName,
+    required this.requestedAt,
+    this.status = 'pending',
+    this.notes,
+    this.scheduledDate,
+  });
+}
+
+
 // --- Data Models ---
 
 class Review {
@@ -222,7 +269,7 @@ final List<Mentor> mockMentors = [
     rating: 4.8,
     reviewsCount: mockReviews.length,
     bio: 'Dr. Reed is a leading expert in scalable machine learning models with 10+ years of experience in tech.',
-    imageUrl: 'https://placehold.co/100x100/1E88E5/FFFFFF?text=ER',
+    imageUrl: 'assets/img/mentor2.jpg',
     skills: ['Python', 'SQL', 'TensorFlow', 'Data Modeling', 'Cloud Computing'],
     experienceLevel: 'Senior',
     availability: 'Part-time',
@@ -243,7 +290,7 @@ final List<Mentor> mockMentors = [
     rating: 4.5,
     reviewsCount: 15,
     bio: 'John specializes in building and scaling modern web applications using the MERN stack.',
-    imageUrl: 'https://placehold.co/100x100/FDD835/000000?text=JD',
+    imageUrl: 'assets/img/mentor1.jpg',
     skills: ['React', 'Node.js', 'MongoDB', 'AWS', 'JavaScript'],
     experienceLevel: 'Intermediate',
     availability: 'Full-time',
@@ -267,7 +314,7 @@ final List<Mentor> mockMentors = [
     rating: 4.9,
     reviewsCount: 30,
     bio: 'Maria leads product development for major SaaS platforms.',
-    imageUrl: 'https://placehold.co/100x100/4CAF50/FFFFFF?text=MS',
+    imageUrl: 'assets/img/mentor3.jpg',
     skills: ['Product Strategy', 'JIRA', 'UX/UI', 'Go-to-Market'],
     experienceLevel: 'Lead',
     availability: 'Weekends',
@@ -456,6 +503,303 @@ class MentorStatCard extends StatelessWidget {
     );
   }
 }
+
+
+
+// -----------------------------------------------------------------------------
+// NEW: Mock data storage (in a real app, this would be a database/API)
+// -----------------------------------------------------------------------------
+
+class MockDataStorage {
+  static final List<Message> _messages = [];
+  static final List<SessionRequest> _sessionRequests = [];
+
+  // Message methods
+  static void sendMessage(Message message) {
+    _messages.add(message);
+    logger.i('Message sent to mentor: ${message.content}');
+  }
+
+  static List<Message> getMessagesForMentor(String mentorId) {
+    return _messages.where((msg) => msg.senderId == mentorId).toList();
+  }
+
+  // Session request methods
+  static void createSessionRequest(SessionRequest request) {
+    _sessionRequests.add(request);
+    logger.i('Session request created for mentor: ${request.mentorName}');
+  }
+
+  static List<SessionRequest> getPendingRequestsForMentor(String mentorId) {
+    return _sessionRequests.where((req) => 
+      req.mentorId == mentorId && req.status == 'pending').toList();
+  }
+
+  static void updateSessionRequestStatus(String requestId, String status, {DateTime? scheduledDate}) {
+    final request = _sessionRequests.firstWhere((req) => req.id == requestId);
+    final index = _sessionRequests.indexOf(request);
+    _sessionRequests[index] = SessionRequest(
+      id: request.id,
+      menteeId: request.menteeId,
+      menteeName: request.menteeName,
+      mentorId: request.mentorId,
+      mentorName: request.mentorName,
+      requestedAt: request.requestedAt,
+      status: status,
+      notes: request.notes,
+      scheduledDate: scheduledDate,
+    );
+    logger.i('Session request $requestId updated to status: $status');
+  }
+}
+
+// -----------------------------------------------------------------------------
+// NEW: Private Message Modal
+// -----------------------------------------------------------------------------
+
+class PrivateMessageModal extends StatefulWidget {
+  final String mentorId;
+  final String mentorName;
+
+  const PrivateMessageModal({
+    super.key,
+    required this.mentorId,
+    required this.mentorName,
+  });
+
+  @override
+  State<PrivateMessageModal> createState() => _PrivateMessageModalState();
+}
+
+class _PrivateMessageModalState extends State<PrivateMessageModal> {
+  final TextEditingController messageController = TextEditingController();
+  bool isSending = false;
+
+  void sendMessage() async {
+    if (messageController.text.trim().isEmpty) return;
+
+    setState(() {
+      isSending = true;
+    });
+
+    // Simulate API call delay
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    final message = Message(
+      senderId: 'current_user_id', // Mock current user ID
+      senderName: 'Current User', // Mock current user name
+      content: messageController.text.trim(),
+      timestamp: DateTime.now(),
+    );
+
+    MockDataStorage.sendMessage(message);
+
+    setState(() {
+      isSending = false;
+    });
+
+    if (mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Message sent to ${widget.mentorName}'),
+          backgroundColor: accentGreen,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Message ${widget.mentorName}',
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const Divider(),
+          const SizedBox(height: 10),
+          const Text(
+            'Send a private message to this mentor',
+            style: TextStyle(fontSize: 14, color: darkGreyText),
+          ),
+          const SizedBox(height: 20),
+          TextField(
+            controller: messageController,
+            maxLines: 4,
+            decoration: InputDecoration(
+              hintText: 'Type your message here...',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              contentPadding: const EdgeInsets.all(12),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: isSending ? null : sendMessage,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryBlue,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: isSending
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : const Text('Send Message', style: TextStyle(fontSize: 16)),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
+    );
+  }
+}
+
+// -----------------------------------------------------------------------------
+// NEW: Request 1-on-1 Session Modal
+// -----------------------------------------------------------------------------
+
+class RequestSessionModal extends StatefulWidget {
+  final String mentorId;
+  final String mentorName;
+
+  const RequestSessionModal({
+    super.key,
+    required this.mentorId,
+    required this.mentorName,
+  });
+
+  @override
+  State<RequestSessionModal> createState() => _RequestSessionModalState();
+}
+
+class _RequestSessionModalState extends State<RequestSessionModal> {
+  final TextEditingController notesController = TextEditingController();
+  bool isSubmitting = false;
+
+  void submitSessionRequest() async {
+    setState(() {
+      isSubmitting = true;
+    });
+
+    // Simulate API call delay
+    await Future.delayed(const Duration(milliseconds: 800));
+
+    final request = SessionRequest(
+      id: 'req_${DateTime.now().millisecondsSinceEpoch}',
+      menteeId: 'current_user_id', // Mock current user ID
+      menteeName: 'Current User', // Mock current user name
+      mentorId: widget.mentorId,
+      mentorName: widget.mentorName,
+      requestedAt: DateTime.now(),
+      notes: notesController.text.trim().isNotEmpty ? notesController.text.trim() : null,
+      status: 'pending',
+    );
+
+    MockDataStorage.createSessionRequest(request);
+
+    setState(() {
+      isSubmitting = false;
+    });
+
+    if (mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Session request sent to ${widget.mentorName}'),
+          backgroundColor: accentGreen,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Request 1-on-1 Session with ${widget.mentorName}',
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const Divider(),
+          const SizedBox(height: 10),
+          const Text(
+            'Send a session request to this mentor. They will need to accept your request before scheduling a session.',
+            style: TextStyle(fontSize: 14, color: darkGreyText),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Session Request Notes (Optional)',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: notesController,
+            maxLines: 3,
+            decoration: InputDecoration(
+              hintText: 'Add any specific topics or questions you\'d like to discuss...',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              contentPadding: const EdgeInsets.all(12),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: isSubmitting ? null : submitSessionRequest,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: accentGreen,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: isSubmitting
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : const Text('Send Session Request', style: TextStyle(fontSize: 16)),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
+    );
+  }
+}
+
+
+
+
 
 /// A card for lessons and downloadable resources
 Widget _buildContentResourceCard({
@@ -924,6 +1268,40 @@ class MentorDetailScreen extends StatelessWidget {
 
   // Action Buttons (Correctly uses Book 1-on-1 Session)
   Widget _buildActionButtons(BuildContext context, Mentor mentor) {
+    // void showPrivateMessageModal() {
+    //   showModalBottomSheet(
+    //     context: context,
+    //     isScrollControlled: true,
+    //     backgroundColor: Colors.transparent,
+    //     builder: (context) {
+    //       return Padding(
+    //         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+    //         child: PrivateMessageModal(
+    //           mentorId: mentor.id,
+    //           mentorName: mentor.name,
+    //         ),
+    //       );
+    //     },
+    //   );
+    // }
+
+    void showRequestSessionModal() {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) {
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: RequestSessionModal(
+              mentorId: mentor.id,
+              mentorName: mentor.name,
+            ),
+          );
+        },
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       child: Row(
@@ -932,13 +1310,15 @@ class MentorDetailScreen extends StatelessWidget {
           Expanded(
             child: ElevatedButton.icon(
               onPressed: () {
-                logger.i('Attempting to send private message to ${mentor.name}');
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Starting private chat with ${mentor.name} (Mock)')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PrivateMessageScreen(mentor: mentor),
+                  ),
                 );
               },
               icon: const Icon(Icons.send),
-              label: const Text('Private Message'),
+              label: const Text('Send Me a Private Message'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryBlue,
                 foregroundColor: Colors.white,
@@ -951,21 +1331,15 @@ class MentorDetailScreen extends StatelessWidget {
           const SizedBox(width: 10),
           // Book 1-on-1 Session Button (Secondary Action)
           Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () {
-                logger.i('Attempting to book 1-on-1 session with ${mentor.name}');
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Opening booking screen for ${mentor.name} (Mock)')),
-                );
-              },
-              icon: const Icon(Icons.calendar_month, color: accentGreen), 
-              label: const Text('Book 1-on-1 Session'), 
-              style: OutlinedButton.styleFrom(
+            child: ElevatedButton.icon(
+              onPressed: showRequestSessionModal,
+              icon: const Icon(Icons.calendar_month),
+              label: const Text('Request 1-on-1 Session'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: accentGreen,
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                side: const BorderSide(color: accentGreen, width: 2), 
-                foregroundColor: accentGreen, 
-                backgroundColor: accentGreen.withAlpha((0.05 * 255).toInt()), 
                 elevation: 0,
               ),
             ),
@@ -1410,6 +1784,219 @@ class _FilterModalState extends State<FilterModal> {
   }
 }
 
+
+// -----------------------------------------------------------------------------
+// NEW: Private Message Chat Screen
+// -----------------------------------------------------------------------------
+
+class PrivateMessageScreen extends StatefulWidget {
+  final Mentor mentor;
+
+  const PrivateMessageScreen({super.key, required this.mentor});
+
+  @override
+  State<PrivateMessageScreen> createState() => _PrivateMessageScreenState();
+}
+
+class _PrivateMessageScreenState extends State<PrivateMessageScreen> {
+  final TextEditingController _messageController = TextEditingController();
+  final List<Map<String, dynamic>> _messages = [
+    {
+      'text': 'Hello! I\'m interested in your mentorship services.',
+      'isMe': true,
+      'time': DateTime.now().subtract(const Duration(minutes: 5)),
+    },
+    {
+      'text': 'Hi! Thanks for reaching out. I\'d be happy to help you. What specific areas are you looking to improve?',
+      'isMe': false,
+      'time': DateTime.now().subtract(const Duration(minutes: 3)),
+    },
+  ];
+
+  void _sendMessage() {
+    if (_messageController.text.trim().isEmpty) return;
+
+    setState(() {
+      _messages.add({
+        'text': _messageController.text,
+        'isMe': true,
+        'time': DateTime.now(),
+      });
+    });
+
+    _messageController.clear();
+
+    // Simulate mentor reply after 2 seconds
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _messages.add({
+            'text': 'Thanks for your message! I\'ll get back to you with more detailed advice shortly.',
+            'isMe': false,
+            'time': DateTime.now().add(const Duration(seconds: 2)),
+          });
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Row(
+          children: [
+            CircleAvatar(
+              backgroundImage: NetworkImage(widget.mentor.imageUrl),
+              radius: 18,
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.mentor.name,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  'Online',
+                  style: TextStyle(fontSize: 12, color: Colors.green[600]),
+                ),
+              ],
+            ),
+          ],
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 0.5,
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              reverse: false,
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                final message = _messages[index];
+                return _buildMessageBubble(
+                  text: message['text'] as String,
+                  isMe: message['isMe'] as bool,
+                  time: message['time'] as DateTime,
+                );
+              },
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                  blurRadius: 8,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _messageController,
+                    decoration: InputDecoration(
+                      hintText: 'Type your message...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: lightGreyBackground,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                    ),
+                    onSubmitted: (_) => _sendMessage(),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                CircleAvatar(
+                  backgroundColor: primaryBlue,
+                  child: IconButton(
+                    icon: const Icon(Icons.send, color: Colors.white),
+                    onPressed: _sendMessage,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMessageBubble({required String text, required bool isMe, required DateTime time}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (!isMe)
+            CircleAvatar(
+              backgroundImage: NetworkImage(widget.mentor.imageUrl),
+              radius: 16,
+            ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isMe ? primaryBlue : lightGreyBackground,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(16),
+                  topRight: const Radius.circular(16),
+                  bottomLeft: isMe ? const Radius.circular(16) : const Radius.circular(4),
+                  bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(16),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    text,
+                    style: TextStyle(
+                      color: isMe ? Colors.white : Colors.black87,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${time.hour}:${time.minute.toString().padLeft(2, '0')}',
+                    style: TextStyle(
+                      color: isMe ? Colors.white70 : darkGreyText,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          if (isMe)
+            const CircleAvatar(
+              radius: 16,
+              backgroundColor: lightGreyBackground,
+              child: Icon(Icons.person, color: darkGreyText, size: 18),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+
+
+
 // -----------------------------------------------------------------------------
 // 7. Mentors Screen (Unchanged)
 // -----------------------------------------------------------------------------
@@ -1685,3 +2272,4 @@ class _MentorsScreenState extends State<MentorsScreen> {
     );
   }
 }
+

@@ -425,7 +425,8 @@ class _TwoFactorAuthScreenState extends State<TwoFactorAuthScreen> {
             Switch(
               value: _isTwoFaEnabled,
               onChanged: (newValue) => _handleDisableToggle(context, newValue),
-              activeColor: successGreen,
+              activeTrackColor: successGreen.withAlpha((0.3 * 255).toInt()),  // Track color when active
+              activeThumbColor: successGreen, 
               inactiveTrackColor: errorRed.withAlpha((0.3 * 255).toInt()),
               inactiveThumbColor: errorRed,
             ),

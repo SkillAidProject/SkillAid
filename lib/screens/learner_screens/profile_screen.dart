@@ -5,7 +5,8 @@ import 'package:skillaid/screens/learner_screens/bookings_screen.dart';
 import 'package:skillaid/screens/learner_screens/questions_screen.dart';
 import 'package:skillaid/screens/learner_screens/filemanager_screen.dart';
 import 'package:skillaid/screens/learner_screens/change_password_screen.dart';
-import 'package:skillaid/screens/learner_screens/2fa_auth.dart';
+import 'package:skillaid/screens/learner_screens/notif_preference.dart';
+import 'package:skillaid/screens/learner_screens/two_fa_auth.dart';
 import 'notifications_screen.dart';
 
 final logger = Logger();
@@ -822,7 +823,7 @@ class _LearnerProfileScreenState extends State<LearnerProfileScreen> {
                               color: deepIndigo,
                               onTap: () {
                                  logger.i('Navigating to Notification Preferences.');
-                                 Navigator.push(context, MaterialPageRoute(builder: (ctx) => const _PlaceholderScreen(title: 'Notification Preferences')));
+                                 Navigator.push(context, MaterialPageRoute(builder: (ctx) => const NotificationSettingsScreen()));
                               },
                             ),
                           ],
@@ -851,48 +852,6 @@ class _LearnerProfileScreenState extends State<LearnerProfileScreen> {
   }
 }
 
-// -----------------------------------------------------------------------------
-// 3. Placeholder Screen for Mock Navigation
-// -----------------------------------------------------------------------------
-
-class _PlaceholderScreen extends StatelessWidget {
-  final String title;
-  const _PlaceholderScreen({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: deepIndigo,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'You navigated to the "$title" screen.',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18, color: darkGreyText),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(backgroundColor: vibrantCyan, padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10)),
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              label: const Text('Go Back', style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
-// -----------------------------------------------------------------------------
-// 3. Certificate Screen Components (NEWLY ADDED)
-// -----------------------------------------------------------------------------
 
 /// Formats a DateTime object into 'Month D, YYYY' format without external packages.
 String _formatDate(DateTime date) {
