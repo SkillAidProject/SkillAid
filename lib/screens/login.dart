@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:skillaid/screens/learner_screens/user_dashboard_screen.dart';
+import 'package:skillaid/screens/learner_screens/learner_dashboard_screen.dart';
 
 final logger = Logger();
 
