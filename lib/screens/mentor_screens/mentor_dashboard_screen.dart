@@ -570,8 +570,8 @@ class _MentorDashboardScreenState extends State<MentorDashboardScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _navItem(Icons.home_filled, 'Home', 0),
-              _navItem(Icons.search, 'Programs', 1),
-              _navItem(Icons.bookmark_border, 'Bookings', 2),
+              _navItem(Icons.local_library_outlined, 'Programs', 1),
+              _navItem(Icons.calendar_month_outlined, 'Bookings', 2),
               _navItem(Icons.people_outline, 'Mentees', 3),
               _navItem(Icons.person_outline, 'Me', 4),
             ],

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:skillaid/screens/learner_screens/learner_dashboard_screen.dart';
+import 'package:skillaid/screens/mentor_screens/mentor_dashboard_screen.dart';
+import 'package:collection/collection.dart';
 
 final logger = Logger();
 
@@ -14,6 +16,40 @@ const Color borderGrey = Color(0xFFE0E0E0); // Light border color
 const Color googleRed = Color(0xFFDB4437);
 const Color appleBlack = Colors.black;
 const Color facebookBlue = Color(0xFF1877F2);
+
+
+
+class User {
+  final String email;
+  final String password;
+  final bool isMentor;
+
+  User ({
+    required this.email,
+    required this.password,
+    required this.isMentor,
+  });
+}
+
+
+
+//  mock users
+final List<User> mockUsers = [
+  User(
+    email: 'ik@skillaid.com',
+    password: 'iksteve',
+    isMentor: false,
+  ),
+  User(
+    email: 'peters@skillaid.com',
+    password: '123456',
+    isMentor: true,
+  ),
+];
+
+
+
+
 
 // --- Main Login/Sign Up Screen ---
 
@@ -33,6 +69,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  String? errorMsg;
 
   @override
   void dispose() {
@@ -46,12 +83,35 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   void _submitAuthForm() {
     if (_formKey.currentState!.validate()) {
       // API integration would happen here
-      final email = _emailController.text;
-      // final password = _passwordController.text;
+      final inputEmail = _emailController.text;
+      final inputPassword = _passwordController.text;
 
-      logger.i('Submitting Auth for: ${_isLogin ? 'SIGNIN' : 'SIGN UP'} with $email');
+      final foundUser = mockUsers.firstWhereOrNull(
+        (user) => user.email == inputEmail,
+      );
+
+      setState(() {
+        if (foundUser == null) {
+          errorMsg = 'Invalid email';
+        } else {
+
+          if (foundUser.password != inputPassword) {
+            errorMsg = 'Incorrect password';
+          } else {
+            errorMsg = null;
+          
+            if (foundUser.isMentor) {
+              Navigator.push(context, MaterialPageRoute(builder: (ctx) => const MentorDashboardScreen()));
+            } else {
+              Navigator.push(context, MaterialPageRoute(builder: (ctx) => const DashboardScreen()));
+            }
+          }
+        }
+      });
+
+      logger.i('Submitting Auth for: ${_isLogin ? 'SIGNIN' : 'SIGN UP'} with $inputEmail');
       
-      Navigator.push(context, MaterialPageRoute(builder: (ctx) => const DashboardScreen()));
+      // Navigator.push(context, MaterialPageRoute(builder: (ctx) => const DashboardScreen()));
     }
   }
 
@@ -123,6 +183,15 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
+
+                    if(errorMsg != null)
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        errorMsg!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
 
                     if(!_isLogin)
                     // Full Name Field
