@@ -16,7 +16,7 @@ const Color actionOrange = Color(0xFFFF9800);
 const Color neutralBlue = Color(0xFF64B5F6);
 const Color shadowColor = Color(0xFFC5C6D0);
 
-// --- Data Models (Unchanged) ---
+// --- Data Models (Updated with sessionType) ---
 
 class Mentor {
   final String name;
@@ -42,11 +42,13 @@ class Session {
   final String learnerName;
   final String skillTopic;
   final DateTime dateTime;
+  final String sessionType; // 'video', 'audio', or 'chat'
 
   Session({
     required this.learnerName,
     required this.skillTopic,
     required this.dateTime,
+    required this.sessionType,
   });
 }
 
@@ -80,16 +82,19 @@ final List<Session> mockUpcomingSessions = [
     learnerName: 'Alex Johnson',
     skillTopic: 'Advanced Python Debugging',
     dateTime: DateTime.now().add(const Duration(hours: 1, minutes: 30)),
+    sessionType: 'video',
   ),
   Session(
     learnerName: 'Maria Lee',
     skillTopic: 'Cloud Deployment Strategies',
     dateTime: DateTime.now().add(const Duration(hours: 5, minutes: 15)),
+    sessionType: 'audio',
   ),
   Session(
     learnerName: 'Ben Carter',
     skillTopic: 'Introduction to Angular',
     dateTime: DateTime.now().add(const Duration(days: 1, hours: 2)),
+    sessionType: 'chat',
   ),
 ];
 
@@ -498,6 +503,7 @@ class _MentorDashboardScreenState extends State<MentorDashboardScreen> {
                 _AnimatedJoinButton(
                   onTap: () => logger.i('Joining session with ${session.learnerName}'),
                   isActive: isNext,
+                  sessionType: session.sessionType,
                 ),
               ],
             ),
@@ -545,27 +551,25 @@ class _MentorDashboardScreenState extends State<MentorDashboardScreen> {
     );
   }
 
-  // --- Stylish Bottom Navigation Bar (New) ---
+  // --- NEW Minimalist Modern Bottom Navigation Bar ---
   Widget _buildCustomBottomNavBar() {
     return Container(
+      margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: deepIndigo, // Keep the deepIndigo color
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha((0.4 * 255).toInt()),
+            color: Colors.black.withAlpha((0.1 * 255).toInt()),
             blurRadius: 15,
             spreadRadius: 2,
+            offset: const Offset(0, 4),
           ),
         ],
-        // Stylish: Rounded top corners
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(25),
-          topRight: Radius.circular(25),
-        ),
       ),
-      child: SafeArea( // Use SafeArea to respect bottom notch/area
+      child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10.0),
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -581,33 +585,31 @@ class _MentorDashboardScreenState extends State<MentorDashboardScreen> {
     );
   }
 
-  // --- Individual Navigation Item (Helper for stylish look) ---
+  // --- Individual Navigation Item (Helper for minimalist look) ---
   Widget _navItem(IconData icon, String label, int index) {
     final isSelected = index == _selectedIndex;
-    // Selected color is Vibrant Cyan, Unselected is white70
-    final color = isSelected ? vibrantCyan : Colors.white70;
-
-    return Material( // Use Material to enable InkWell splash
+    
+    return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () => _onItemTapped(index),
-        borderRadius: BorderRadius.circular(10),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
+        borderRadius: BorderRadius.circular(15),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 icon,
-                color: color,
-                size: isSelected ? 28 : 24, // Subtle size change for selection
+                color: isSelected ? deepIndigo : darkGreyText.withAlpha((0.6 * 255).toInt()),
+                size: isSelected ? 26 : 24,
               ),
               const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
-                  color: color,
+                  color: isSelected ? deepIndigo : darkGreyText.withAlpha((0.6 * 255).toInt()),
                   fontSize: 10,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
@@ -618,8 +620,6 @@ class _MentorDashboardScreenState extends State<MentorDashboardScreen> {
       ),
     );
   }
-
-
 
   Widget _buildActivityFeedItem(Activity activity) {
     return Padding(
@@ -841,7 +841,7 @@ class _MentorDashboardScreenState extends State<MentorDashboardScreen> {
       ),
 
       // 7. Bottom Navigation Bar
-      // NEW Stylish Bottom Navigation Bar
+      // NEW Minimalist Modern Bottom Navigation Bar
       bottomNavigationBar: _buildCustomBottomNavBar(),
     );
   }
@@ -889,12 +889,13 @@ class _PlaceholderScreen extends StatelessWidget {
 
 
 
-// Custom animated button for "Join Now"
+// Custom animated button for "Join Now" with session type indicator
 class _AnimatedJoinButton extends StatefulWidget {
   final VoidCallback onTap;
   final bool isActive;
+  final String sessionType;
 
-  const _AnimatedJoinButton({required this.onTap, required this.isActive});
+  const _AnimatedJoinButton({required this.onTap, required this.isActive, required this.sessionType});
 
   @override
   State<_AnimatedJoinButton> createState() => _AnimatedJoinButtonState();
@@ -920,6 +921,20 @@ class _AnimatedJoinButtonState extends State<_AnimatedJoinButton> {
     setState(() {
       _isTapped = false;
     });
+  }
+
+  // Helper method to get icon based on session type
+  IconData _getSessionTypeIcon() {
+    switch (widget.sessionType) {
+      case 'video':
+        return Icons.videocam;
+      case 'audio':
+        return Icons.mic;
+      case 'chat':
+        return Icons.chat;
+      default:
+        return Icons.videocam;
+    }
   }
 
   @override
@@ -955,7 +970,7 @@ class _AnimatedJoinButtonState extends State<_AnimatedJoinButton> {
           ),
           child: Row(
             children: [
-              const Icon(Icons.videocam, size: 20, color: Colors.white),
+              Icon(_getSessionTypeIcon(), size: 20, color: Colors.white),
               const SizedBox(width: 8),
               Text(
                 widget.isActive ? 'Join Live' : 'Join',
